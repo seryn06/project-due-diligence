@@ -66,8 +66,10 @@ description: >
 
 ## 工具表（<BASE>/scripts/）
 
-- search_openalex.py：主发现（--type review 找综述；--year-from/to；游标翻页自动）
-- search_s2.py：引文扩展（--expand-refs <id> / --expand-cites <id>；普通 --query 检索）
+- search_openalex.py：主发现（--type review 找综述；--year-from/to；游标翻页自动）；
+  引文扩展兜底：--cited-by Wxxx（谁引了它）/ --refs-of Wxxx（它引了谁）
+- search_s2.py：引文扩展（--expand-refs <id> / --expand-cites <id>；普通 --query 检索）；
+  免 key 共享池常 429——持续 429 时改用 OpenAlex 引文扩展并降级记录
 - search_epmc.py：生命科学源
 - search_arxiv.py：AI/CS 预印本
 - dedup.py：合并 raw→catalog（--check 校验无重复）
