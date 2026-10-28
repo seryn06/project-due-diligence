@@ -131,7 +131,7 @@ def check_p4(run, st):
     v = []
     tier = lib.TIERS[st["tier"]]
     cat = lib.load_json(os.path.join(run, "catalog.json")) or []
-    l2 = [r for r in cat if r.get("reading_level") == "L2"]
+    l2 = [r for r in cat if r.get("reading_level") in ("L2", "L3")]  # L3 计入 L2 配额（更深读）
     l3 = [r for r in cat if r.get("reading_level") == "L3"]
     for r in l2 + l3:
         p = os.path.join(run, "paper_notes", f"{r['paper_id']}.md")
@@ -140,8 +140,8 @@ def check_p4(run, st):
             continue
         text = open(p, encoding="utf-8").read()
         for sec in NOTE_SECTIONS:
-            if sec not in text:
-                v.append(violation("G4.1", f"{r['paper_id']} 卡片缺段落：{sec}"))
+            if f"## {sec}" not in text:
+                v.append(violation("G4.1", f"{r['paper_id']} 卡片缺段落标题：## {sec}"))
     if len(l2) < tier["l2_min"]:
         v.append(violation("G4.2", f"L2 精读 {len(l2)} < 档位下限 {tier['l2_min']}"))
     if len(l3) < tier["l3_min"]:
