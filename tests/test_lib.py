@@ -10,7 +10,7 @@ class TestNorm(unittest.TestCase):
 
     def test_norm_title(self):
         self.assertEqual(lib.norm_title("Hello, World!"), "helloworld")
-        self.assertEqual(lib.norm_title("Café— naïve"), "cafenave")
+        self.assertEqual(lib.norm_title("Café— naïve"), "cafenaive")
 
 class TestJsonIO(unittest.TestCase):
     def test_roundtrip_missing(self):
