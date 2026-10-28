@@ -39,5 +39,32 @@ class TestPagination(unittest.TestCase):
             oa.lib.fetch_json = orig
         self.assertEqual(len(out), 60)
 
+class TestCitationExpansion(unittest.TestCase):
+    def test_cited_by(self):
+        def fake(url, params=None, **kw):
+            assert "cites:W123" in params.get("filter", ""), params
+            return {"meta": {"next_cursor": None}, "results": [{"id": "https://openalex.org/W9"}]}
+        orig = oa.lib.fetch_json; oa.lib.fetch_json = fake
+        try:
+            out = oa.cited_by("W123", limit=10)
+        finally:
+            oa.lib.fetch_json = orig
+        self.assertEqual(len(out), 1)
+
+    def test_refs_of_batches(self):
+        def fake(url, params=None, **kw):
+            if url.endswith("/works/W123"):
+                return {"referenced_works": [f"W{i}" for i in range(1, 201)]}
+            assert params.get("filter", "").startswith("openalex:W"), params
+            assert len(params["filter"].split("|")) <= 100
+            return {"meta": {"next_cursor": None},
+                    "results": [{"id": f"https://openalex.org/W{i}"} for i in range(1, 101)]}
+        orig = oa.lib.fetch_json; oa.lib.fetch_json = fake
+        try:
+            out = oa.refs_of("W123", limit=150)
+        finally:
+            oa.lib.fetch_json = orig
+        self.assertEqual(len(out), 150)   # 200 refs -> 两批100，截到 limit
+
 if __name__ == "__main__":
     unittest.main()

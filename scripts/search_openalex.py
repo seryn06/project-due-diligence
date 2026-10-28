@@ -52,10 +52,38 @@ def search(query, year_from=None, year_to=None, ptype=None, limit=50, mailto=Non
             break
     return out[:limit]
 
+def _filter_search(filt, limit=50, mailto=None, sort=None):
+    params = {"filter": filt, "per-page": 50, "mailto": mailto or ""}
+    if sort:
+        params["sort"] = sort
+    out, cursor = [], "*"
+    while len(out) < limit:
+        params["cursor"] = cursor
+        data = lib.fetch_json(API, params, limiter=LIMITER)
+        out.extend(data.get("results", []))
+        cursor = (data.get("meta") or {}).get("next_cursor")
+        if not cursor:
+            break
+    return out[:limit]
+
+def cited_by(openalex_id, limit=50, mailto=None):
+    """谁引了这篇（向后追踪）。openalex_id 形如 W2741809807。"""
+    return _filter_search(f"cites:{openalex_id}", limit, mailto, sort="cited_by_count:desc")
+
+def refs_of(openalex_id, limit=100, mailto=None):
+    """这篇引了谁（向前追踪）。基于 referenced_works 批量取元数据（每批 ≤100）。"""
+    w = lib.fetch_json(f"{API}/{openalex_id}", params={"mailto": mailto or ""}, limiter=LIMITER)
+    refs = (w.get("referenced_works") or [])[:limit]
+    out = []
+    for i in range(0, len(refs), 100):
+        batch = refs[i:i + 100]
+        out.extend(_filter_search("openalex:" + "|".join(batch), len(batch), mailto))
+    return out
+
 def main(argv=None):
-    ap = argparse.ArgumentParser(description="OpenAlex search")
+    ap = argparse.ArgumentParser(description="OpenAlex search / citation expansion")
     ap.add_argument("--run", required=True)
-    ap.add_argument("--query", required=True)
+    ap.add_argument("--query")
     ap.add_argument("--question", default="")
     ap.add_argument("--path", required=True, choices=lib.PATHS)
     ap.add_argument("--purpose", default="")
@@ -64,13 +92,27 @@ def main(argv=None):
     ap.add_argument("--type", choices=["review", "article", "preprint"])
     ap.add_argument("--limit", type=int, default=50)
     ap.add_argument("--mailto", default="")
+    ap.add_argument("--cited-by", help="OpenAlex work id：谁引了它")
+    ap.add_argument("--refs-of", help="OpenAlex work id：它引了谁")
     a = ap.parse_args(argv)
-    works = search(a.query, a.year_from, a.year_to, a.type, a.limit, a.mailto)
+    if a.cited_by or a.refs_of:
+        if a.cited_by:
+            works = cited_by(a.cited_by, a.limit, a.mailto)
+            q = f"cites:{a.cited_by}"
+        else:
+            works = refs_of(a.refs_of, a.limit, a.mailto)
+            q = f"refs:{a.refs_of}"
+    elif a.query:
+        works = search(a.query, a.year_from, a.year_to, a.type, a.limit, a.mailto)
+        q = a.query
+    else:
+        ap.error("需要 --query 或 --cited-by/--refs-of")
+        return 2
     recs = [normalize(w) for w in works]
     p = lib.raw_path(a.run, "openalex")
     lib.save_json(p, recs)
     sid = lib.append_search_log(a.run, {
-        "source": "openalex", "query": a.query, "path": a.path, "question_id": a.question,
+        "source": "openalex", "query": q, "path": a.path, "question_id": a.question,
         "purpose": a.purpose,
         "filters": {"year_from": a.year_from, "year_to": a.year_to, "type": a.type, "limit": a.limit},
         "result_count": len(recs)})
