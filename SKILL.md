@@ -33,7 +33,12 @@ description: >
 
 ### P1 理解 → gate check P1
 读 brief，产出 question_tree.md（模板+格式约定见 templates/zh/question_tree.md）。
-核心问题数量按档位（快速≥3/标准≥5/深入≥8）。与用户确认一次问题树边界，然后：
+核心问题数量按档位（快速≥3/标准≥5/深入≥8）。
+**蓝本全覆盖检查（必做）**：若用户提供了蓝本/方案文档/建议稿（如 GPT 建议原文），
+问题树必须**逐节映射**其全部维度——每个章节/维度要么有对应问题节点，要么在树尾注明
+不映射的理由；一等内容不得降级为其他问题的子节点（试点教训：轨迹评测与回归监控
+被压缩致 AgentBench/GAIA/τ-bench 簇整簇漏检）。
+与用户确认一次问题树边界，然后：
 `python3 <BASE>/scripts/gate.py set-phase --run <RUN> P2`（此后 P2-P6 自治推进）。
 
 ### P2 检索计划 → gate check P2
