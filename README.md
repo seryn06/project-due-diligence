@@ -13,7 +13,7 @@
 ## 安装
 
 ```bash
-git clone <本仓库>
+git clone https://github.com/seryn06/project-due-diligence.git
 cd project-due-diligence
 ./install.sh          # 软链到 ~/.claude/skills/project-due-diligence
 ```
