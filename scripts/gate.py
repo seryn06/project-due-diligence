@@ -238,7 +238,7 @@ def check_p7(run, st):
         if w.get("rule") not in text:
             v.append(violation("G7.5", f"豁免 {w.get('rule')} 未在报告中披露"))
     # G7.6 章节深度下限（正文字符数，剔除表格行/HTML注释/标题；防"提要式"报告）
-    DEPTH_FLOORS = {"1": 200, "4": 400, "5": 200, "8": 400, "9": 200, "10": 200}
+    DEPTH_FLOORS = {"1": 200, "4": 600, "5": 300, "8": 600, "9": 200, "10": 200}
     for i, sec in enumerate(lib.REPORT_SECTIONS, 1):
         if str(i) not in DEPTH_FLOORS:
             continue

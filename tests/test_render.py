@@ -29,8 +29,8 @@ class TestBuild(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             run = gatefix.fresh(tmp)
             tpl = os.path.join(tmp, "tpl.md")
-            fs = "深度下限填充正文样例。" * 12
-            fl = "深度下限填充正文样例，长章节需要更长的分析正文。" * 12
+            fs = "深度下限填充正文样例。" * 16
+            fl = "深度下限填充正文样例，长章节需要更长的分析正文。" * 16
             open(tpl, "w", encoding="utf-8").write(
                 f"# {{{{project_name}}}} {{{{generated_at}}}}\n\n## 1. Executive Summary\n\n见 (E01)。{fs}\n"
                 f"## 2. 项目分解\nx\n## 3. 文献检索协议（含覆盖限制）\nx\n## 4. 研究现状\n{fl}\n"

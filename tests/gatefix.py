@@ -97,8 +97,8 @@ def full_run(d, tier="标准", with_state=True):
 
     report = ["# 背调报告", ""]
     # G7.6 深度下限：§1/§5/§9/§10 ≥200、§4/§8 ≥400 正文汉字（去空白）
-    filler_short = "本节为满足章节深度下限的分析正文样例。" * 12
-    filler_long = "本节为满足章节深度下限的分析正文样例，现状须讲脉络并引用证据。" * 15
+    filler_short = "本节为满足章节深度下限的分析正文样例。" * 16
+    filler_long = "本节为满足章节深度下限的分析正文样例，现状须讲脉络并引用证据。" * 24
     for i, sec in enumerate(lib.REPORT_SECTIONS, 1):
         report.append(f"## {i}. {sec}")
         report.append("")
