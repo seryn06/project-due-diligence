@@ -1,5 +1,5 @@
 """多源记录去重合并入 catalog。stdlib only。"""
-import argparse, os, sys
+import argparse, os, re, sys
 import lib
 
 def record_score(r):
@@ -60,7 +60,9 @@ def update_catalog(run_dir):
     idx_doi = {lib.norm_doi(r["doi"]): r for r in catalog if r.get("doi")}
     idx_title = {lib.norm_title(r["title"]): r for r in catalog if r.get("title")}
     n_new = n_updated = 0
-    next_seq = len(catalog) + 1
+    used = [int(r["paper_id"][1:]) for r in catalog
+            if re.fullmatch(r"P\d{3}", str(r.get("paper_id", "")))]
+    next_seq = (max(used) + 1) if used else 1
     for m in merged:
         hit = idx_doi.get(lib.norm_doi(m.get("doi", ""))) or \
               idx_title.get(lib.norm_title(m.get("title", "")))

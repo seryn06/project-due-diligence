@@ -88,5 +88,20 @@ class TestIdempotentRerun(unittest.TestCase):
             rc = dedup.main(["--run", d, "--check"])
             self.assertEqual(rc, 0)
 
+    def test_id_gap_rerun_no_collision(self):
+        """目录 ID 有空洞（如人工重号后 P001,P003）时，新记录不得撞已有 ID。"""
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "raw"))
+            # 预置：两行，ID 为 P001 与 P003（存在空洞）
+            lib.save_json(os.path.join(d, "catalog.json"),
+                          [rec(paper_id="P001", doi="10.1/a", title="Row A"),
+                           rec(paper_id="P003", doi="10.1/c", title="Row C")])
+            lib.save_json(os.path.join(d, "raw", "b.json"), [rec(title="Brand New")])
+            dedup.update_catalog(d)
+            cat = lib.load_json(os.path.join(d, "catalog.json"))
+            ids = sorted(r["paper_id"] for r in cat)
+            self.assertEqual(ids, ["P001", "P003", "P004"])
+            self.assertEqual(len(ids), len(set(ids)))
+
 if __name__ == "__main__":
     unittest.main()
