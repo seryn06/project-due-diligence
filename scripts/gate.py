@@ -314,6 +314,14 @@ def cmd_status(a):
     return 0
 
 # ---------- DOI 打伪 ----------
+def _crossref_title(doi, limiter):
+    data = lib.fetch_json(f"https://api.crossref.org/works/{doi}", limiter=limiter, timeout=20)
+    return ((data.get("message") or {}).get("title") or [""])[0]
+
+def _datacite_title(doi, limiter):
+    data = lib.fetch_json(f"https://api.datacite.org/dois/{doi}", limiter=limiter, timeout=20)
+    return ((data.get("data") or {}).get("attributes") or {}).get("titles", [{}])[0].get("title", "")
+
 def cmd_check_doi(a):
     evid = lib.load_json(os.path.join(a.run, "evidence.json")) or []
     cat = {r.get("paper_id"): r for r in (lib.load_json(os.path.join(a.run, "catalog.json")) or [])}
@@ -327,14 +335,21 @@ def cmd_check_doi(a):
     limiter = lib.RateLimiter(0.5)
     for pid in sample:
         r = cat[pid]
+        doi = r["doi"]
+        title, ok = "", False
         try:
-            data = lib.fetch_json(f"https://api.crossref.org/works/{r['doi']}",
-                                  limiter=limiter, timeout=20)
-            title = ((data.get("message") or {}).get("title") or [""])[0]
-            if lib.token_overlap(title, r.get("title", "")) < 0.7:
-                bad.append((pid, "标题不匹配", r["doi"]))
+            title = _crossref_title(doi, limiter)
+            ok = True
         except lib.LibError:
-            bad.append((pid, "DOI 不可解析", r["doi"]))
+            try:   # arXiv 等 DataCite 注册的 DOI 回退
+                title = _datacite_title(doi, limiter)
+                ok = True
+            except lib.LibError:
+                pass
+        if not ok:
+            bad.append((pid, "DOI 不可解析(Crossref+DataCite)", doi))
+        elif lib.token_overlap(title, r.get("title", "")) < 0.7:
+            bad.append((pid, "标题不匹配", doi))
     for row in bad:
         print(f"[FAIL] {row}")
     print(f"[gate] doi: {len(sample) - len(bad)}/{len(sample)} 通过")
