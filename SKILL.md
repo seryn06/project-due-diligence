@@ -47,12 +47,17 @@ description: >
 
 ### P3 搜集+L1 → gate check P3
 逐条执行 protocol 查询（工具表见下），dedup 合并，L1 批量筛选（每批 ~20 篇，
+arXiv 持续 429 时：同格查询换 OpenAlex 等价词执行，协议里原查询标"降级换源"并加 b 号查询，
 每篇纳入/排除+一句理由写进 catalog）。饱和判定：新增节点=0 且新纳入<3 → 停。
 未满足配额→回 P2 补查询或走豁免（waive + 理由，会强制披露进报告）。
 
 ### P4 精读 → gate check P4
 按决策重要性选 L2（标准档 10-15 篇）逐篇写 paper_notes/<pid>.md（八段模板）；
 最接近项目的 2-3 篇升 L3。全文：可用 scansci-pdf 则下载；否则摘要级并如实标注。
+**先汇编后写卡**：批量导出 L2/L3 的 catalog.abstract，逐篇把摘要里的具体事实挖进卡片
+（数据集规模/效应量/百分比/成本倍数/模型族）——"摘要级不可知"只允许用在摘要真没有的
+信息上；卡片数字密度直接决定报告深度（两轮试点教训）。卡片引用证据号必须先有
+evidence.json 条目再写"见 Exx"（G4.4 校验归属一致）。
 `gate.py check doi --run <RUN>` 做 DOI 打伪（需网络）。
 
 ### P5 综合 → gate check P5
@@ -66,8 +71,8 @@ description: >
 →novelty_audit.json。细则 references/novelty-audit.md。
 
 ### P7 报告 → gate check P7
-`render_report.py report --run <RUN>` 生成骨架 → 逐章撰写 → check P7。
-缺章/幽灵引用/占位符/未披露豁免都会被拦；**G7.6 章节深度下限**：§1/§5/§9/§10 ≥200
+`render_report.py report --run <RUN>` 生成骨架 → **先重读 L2/L3 卡片汇编数字清单** →
+逐章撰写 → check P7。缺章/幽灵引用/占位符/未披露豁免都会被拦；**G7.6 章节深度下限**：§1/§5/§9/§10 ≥200
 正文汉字、§5 ≥300、§4/§8 ≥600——分析章节必须把台账证据用起来：§4 逐工作讨论（L2/L3
 卡片内容与摘要中的具体数字进正文，不是罗列论文名）、§8 每方向带实验协议/先例对照/回退，
 可行性给数字。提要式报告过不了门。
@@ -81,6 +86,7 @@ description: >
 - search_epmc.py：生命科学源
 - search_arxiv.py：AI/CS 预印本
 - dedup.py：合并 raw→catalog（--check 校验无重复）
+- compare_runs.py：跨运行区对比（--a --b）——同题重跑的重合度/缺口对照（框架敏感性分析）
 - gate.py：new/set-phase/check/waive/status（check doi = DOI 打伪）
 - render_report.py：report 生成 / table 查看（catalog|gaps|search|novelty）
 

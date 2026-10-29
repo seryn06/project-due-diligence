@@ -108,7 +108,12 @@ def check_p3(run, st):
             v.append(violation("G3.3", f"{r['paper_id']} 纳入但未挂问题节点"))
     if len(inc) < tier["min_included"]:
         v.append(violation("G3.4", f"纳入文献 {len(inc)} < 档位下限 {tier['min_included']}"))
-    n_rev = sum(1 for r in inc if r.get("paper_type") == "review")
+    def _is_survey(r):
+        # 2025-2026 综述多为 preprint/会议类型，OpenAlex 不打 review 标记；
+        # 题名含 survey/a review/综述 即认定（三次真实运行教训：纯类型认定逼出凑数纳入）
+        return (r.get("paper_type") == "review"
+                or bool(re.search(r"(survey|a review|systematic review|综述)", r.get("title", ""), re.I)))
+    n_rev = sum(1 for r in inc if _is_survey(r))
     if n_rev < tier["min_reviews"]:
         v.append(violation("G3.4", f"综述 {n_rev} < 档位下限 {tier['min_reviews']}"))
     for r in cat:
@@ -146,9 +151,22 @@ def check_p4(run, st):
         v.append(violation("G4.2", f"L2 精读 {len(l2)} < 档位下限 {tier['l2_min']}"))
     if len(l3) < tier["l3_min"]:
         v.append(violation("G4.2", f"L3 深读 {len(l3)} < 档位下限 {tier['l3_min']}"))
-    for e in lib.load_json(os.path.join(run, "evidence.json")) or []:
+    evid = lib.load_json(os.path.join(run, "evidence.json")) or []
+    for e in evid:
         if not (e.get("evidence_quote") and e.get("location")):
             v.append(violation("G4.3", f"{e.get('claim_id')} 缺原文引文或位置"))
+    # G4.4 卡片引用的证据号必须存在且归属本卡片论文（试点 E30/E31 错位教训）
+    ev_by_id = {e.get("claim_id"): e for e in evid}
+    for r in l2 + l3:
+        p = os.path.join(run, "paper_notes", f"{r['paper_id']}.md")
+        if not os.path.exists(p):
+            continue
+        for eid in set(re.findall(r"见 (E\d{2,})", open(p, encoding="utf-8").read())):
+            e = ev_by_id.get(eid)
+            if e is None:
+                v.append(violation("G4.4", f"{r['paper_id']} 卡片引用不存在的证据 {eid}"))
+            elif e.get("paper_id") != r["paper_id"]:
+                v.append(violation("G4.4", f"{r['paper_id']} 卡片引用了 {e.get('paper_id')} 的证据 {eid}（归属错位）"))
     return v
 
 # ---------- G5 ----------
