@@ -60,6 +60,7 @@ def update_catalog(run_dir):
     idx_doi = {lib.norm_doi(r["doi"]): r for r in catalog if r.get("doi")}
     idx_title = {lib.norm_title(r["title"]): r for r in catalog if r.get("title")}
     n_new = n_updated = 0
+    next_seq = len(catalog) + 1
     for m in merged:
         hit = idx_doi.get(lib.norm_doi(m.get("doi", ""))) or \
               idx_title.get(lib.norm_title(m.get("title", "")))
@@ -69,7 +70,9 @@ def update_catalog(run_dir):
             hit["n_sources"] = m["n_sources"]
             n_updated += 1
         else:
-            e = lib.default_entry(m)
+            e = lib.default_entry({k: v for k, v in m.items() if k != "paper_id"})
+            e["paper_id"] = f"P{next_seq:03d}"
+            next_seq += 1
             catalog.append(e)
             if e["doi"]:
                 idx_doi[lib.norm_doi(e["doi"])] = e
@@ -85,8 +88,13 @@ def update_catalog(run_dir):
 
 def check_dup(run_dir):
     catalog = lib.load_json(os.path.join(run_dir, "catalog.json")) or []
-    seen_d, seen_t, dups = {}, {}, []
+    seen_d, seen_t, seen_p, dups = {}, {}, {}, []
     for r in catalog:
+        pid = r.get("paper_id")
+        if pid:
+            if pid in seen_p:
+                dups.append(("paper_id", seen_p[pid], r["paper_id"], pid))
+            seen_p[pid] = r["paper_id"]
         d, t = lib.norm_doi(r.get("doi", "")), lib.norm_title(r.get("title", ""))
         if d:
             if d in seen_d:

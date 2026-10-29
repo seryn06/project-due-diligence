@@ -72,5 +72,21 @@ class TestCheckMode(unittest.TestCase):
             rc = dedup.main(["--run", d, "--check"])
             self.assertEqual(rc, 1)
 
+class TestIdempotentRerun(unittest.TestCase):
+    def test_second_dedup_no_id_collision(self):
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "raw"))
+            lib.save_json(os.path.join(d, "raw", "a.json"), [rec(doi="10.1/x", title="Old One")])
+            dedup.update_catalog(d)
+            # 第二轮：新增一篇 + 旧文件仍在（重跑场景）
+            lib.save_json(os.path.join(d, "raw", "b.json"), [rec(title="New Two")])
+            dedup.update_catalog(d)
+            cat = lib.load_json(os.path.join(d, "catalog.json"))
+            ids = [r["paper_id"] for r in cat]
+            self.assertEqual(len(ids), len(set(ids)), f"paper_id 撞号: {ids}")
+            self.assertEqual(sorted(ids), ["P001", "P002"])
+            rc = dedup.main(["--run", d, "--check"])
+            self.assertEqual(rc, 0)
+
 if __name__ == "__main__":
     unittest.main()
