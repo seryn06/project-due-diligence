@@ -96,13 +96,22 @@ def full_run(d, tier="标准", with_state=True):
                                    "closest_prior_queries": ["SP05"]}]})
 
     report = ["# 背调报告", ""]
+    # G7.6 深度下限：§1/§5/§9/§10 ≥200、§4/§8 ≥400 正文汉字（去空白）
+    filler_short = "本节为满足章节深度下限的分析正文样例。" * 12
+    filler_long = "本节为满足章节深度下限的分析正文样例，现状须讲脉络并引用证据。" * 15
     for i, sec in enumerate(lib.REPORT_SECTIONS, 1):
         report.append(f"## {i}. {sec}")
         report.append("")
         if i == 1:
-            report.append("领域现状明确 (E01)，建议推进。")
+            report.append("领域现状明确 (E01)，建议推进。" + filler_short)
         elif i == 3:
             report.append("（协议内容）")
+        elif i == 4:
+            report.append(filler_long)
+        elif i == 8:
+            report.append(filler_long)
+        elif i in (5, 9, 10):
+            report.append(filler_short)
         elif i == 11:
             report.append("详见台账。")
         else:

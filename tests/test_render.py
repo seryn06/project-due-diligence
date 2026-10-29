@@ -29,13 +29,15 @@ class TestBuild(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             run = gatefix.fresh(tmp)
             tpl = os.path.join(tmp, "tpl.md")
+            fs = "深度下限填充正文样例。" * 12
+            fl = "深度下限填充正文样例，长章节需要更长的分析正文。" * 12
             open(tpl, "w", encoding="utf-8").write(
-                "# {{project_name}} {{generated_at}}\n\n## 1. Executive Summary\n\n见 (E01)。\n"
-                "## 2. 项目分解\nx\n## 3. 文献检索协议（含覆盖限制）\nx\n## 4. 研究现状\nx\n"
-                "## 5. 痛点分析\nx\n## 6. 研究缺口台账\n\n{{gap_table}}\n## 7. 创新性审计\nx\n"
-                "## 8. 候选研究方向\nx\n## 9. 可行性与风险\nx\n## 10. 推荐路线图\nx\n"
-                "## 11. 证据附录\n\n{{catalog_table}}\n\n{{search_stats}}\n\n统计：{{evidence_count}}\n"
-                "{{waiver_table}}\n")
+                f"# {{{{project_name}}}} {{{{generated_at}}}}\n\n## 1. Executive Summary\n\n见 (E01)。{fs}\n"
+                f"## 2. 项目分解\nx\n## 3. 文献检索协议（含覆盖限制）\nx\n## 4. 研究现状\n{fl}\n"
+                f"## 5. 痛点分析\n{fs}\n## 6. 研究缺口台账\n\n{{{{gap_table}}}}\n## 7. 创新性审计\nx\n"
+                f"## 8. 候选研究方向\n{fl}\n## 9. 可行性与风险\n{fs}\n## 10. 推荐路线图\n{fs}\n"
+                f"## 11. 证据附录\n\n{{{{catalog_table}}}}\n\n{{{{search_stats}}}}\n\n统计：{{{{evidence_count}}}}\n"
+                f"{{{{waiver_table}}}}\n")
             out = os.path.join(tmp, "report.md")
             rr.build_report(run, template=tpl, out=out)
             text = open(out, encoding="utf-8").read()

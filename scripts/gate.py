@@ -237,6 +237,19 @@ def check_p7(run, st):
     for w in st.get("waivers", []):
         if w.get("rule") not in text:
             v.append(violation("G7.5", f"豁免 {w.get('rule')} 未在报告中披露"))
+    # G7.6 章节深度下限（正文字符数，剔除表格行/HTML注释/标题；防"提要式"报告）
+    DEPTH_FLOORS = {"1": 200, "4": 400, "5": 200, "8": 400, "9": 200, "10": 200}
+    for i, sec in enumerate(lib.REPORT_SECTIONS, 1):
+        if str(i) not in DEPTH_FLOORS:
+            continue
+        m = re.search(re.escape(f"## {i}. {sec}") + r"\n(.*?)(?=\n## |\Z)", text, re.S)
+        body = m.group(1) if m else ""
+        prose = "\n".join(ln for ln in body.splitlines()
+                          if not ln.strip().startswith(("|", "<!--", "#", "- 检索", "- 豁免")))
+        n = len(re.sub(r"\s", "", prose))
+        if n < DEPTH_FLOORS[str(i)]:
+            v.append(violation("G7.6", f"§{i} 正文过薄（{n} 字符 < {DEPTH_FLOORS[str(i)]}）——"
+                                      f"分析章节须使用台账证据展开，不是提要"))
     return v
 
 CHECKERS = {"P1": check_p1, "P2": check_p2, "P3": check_p3, "P4": check_p4,
