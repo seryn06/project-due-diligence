@@ -221,7 +221,7 @@ def check_p7(run, st):
         if f"## {i}. {sec}" not in text:
             v.append(violation("G7.1", f"缺章节：## {i}. {sec}"))
     cat = {r.get("paper_id") for r in (lib.load_json(os.path.join(run, "catalog.json")) or [])}
-    for pid in sorted(set(re.findall(r"\[(P\d{3})\]", text))):
+    for pid in sorted(set(re.findall(r"\[(P\d{3,})\]", text))):
         if pid not in cat:
             v.append(violation("G7.2", f"引用不存在的文献 {pid}"))
     evid = {e.get("claim_id") for e in (lib.load_json(os.path.join(run, "evidence.json")) or [])}

@@ -20,7 +20,19 @@ cd project-due-diligence
 
 - **零依赖**：纯 Python 3 stdlib（≥3.10），无需 pip install。
 - 脚本可脱离 Claude Code 单独当 CLI 用。
-- 可选增强：[scansci-pdf] 类全文下载工具可用时，L2/L3 论文自动下 PDF；没有则摘要级推进并如实标注。
+- **Windows**：`install.sh` 为 bash 脚本；手动创建软链（管理员 cmd：`mklink /D`，或 PowerShell `New-Item -ItemType SymbolicLink`），并建议设 `PYTHONUTF8=1` 保证中文输出。
+- **建议**：OpenAlex 检索加 `--mailto <你的邮箱>` 进入 polite pool（不限量更稳）。
+- 可选增强：scansci-pdf 类全文下载工具（或任何 PDF 获取途径）可用时，L2/L3 论文可下全文精读；没有则摘要级推进并在报告中如实标注覆盖等级。
+
+## 已知限制（v0.1，诚实清单）
+
+1. **精读默认摘要级**：无内置 PDF 获取代码（依赖运行环境的下载工具钩子）；方法细节级的创新性对比受限，报告中会如实标注覆盖等级。
+2. **Semantic Scholar 免 key 限速严重**（共享池常 429）：引文追踪已有 OpenAlex `--cited-by/--refs-of` 兜底，但只覆盖 OpenAlex 索引。
+3. **中文/CJK 标题不参与标题去重**（归一化后为空自动退化为仅 DOI 键）——英文库为主的检索下影响小。
+4. **gate G7 针对中文模板章节标题**；英文模板 experimental，不经 gate。
+5. **无跨运行区的持续更新**：新一轮背调 = 新运行区；"新文献触发旧结论更新"（Phase 4）未建。
+6. **L1 筛选由 agent 逐批阅读**，无自动分类器——候选越多 token 成本越高（标准档百级候选可承受）。
+7. **skill 自身效果的量化评估**：目前一个真实试点（AIQA 多智能体评测，见 `docs/pilot-AIQA-对照复核.md`）+ 72 个单元测试；专家标注评估集未建。
 
 ## 快速上手
 

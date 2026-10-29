@@ -61,7 +61,7 @@ def update_catalog(run_dir):
     idx_title = {lib.norm_title(r["title"]): r for r in catalog if r.get("title")}
     n_new = n_updated = 0
     used = [int(r["paper_id"][1:]) for r in catalog
-            if re.fullmatch(r"P\d{3}", str(r.get("paper_id", "")))]
+            if re.fullmatch(r"P\d{3,}", str(r.get("paper_id", "")))]
     next_seq = (max(used) + 1) if used else 1
     for m in merged:
         hit = idx_doi.get(lib.norm_doi(m.get("doi", ""))) or \
