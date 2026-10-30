@@ -33,3 +33,35 @@
 3. 摘要级证据（access_status=仅摘要）的 quote 只能取自摘要，且 location 标 `abstract`。
 4. 每个 claim 只挂一个 polarity；正反同存的复合主张应拆成两条 claim。
 5. 无 quote 就无证据：不肯引原文的主张不要进 evidence.json（进报告也只能标"推断"且不给 Exx 号）。
+
+
+## 真实证据条目评注（好例 + 坏例）
+
+**好例（实验结果/支持）**：
+```json
+{"claim_id": "E08", "question_id": "Q2", "paper_id": "P184",
+ "claim": "工具调用基准的 evaluator-人失配率达 18.5%",
+ "evidence_quote": "we find 92 evaluator-human disagreements, corresponding to an 18.5% misalignment rate",
+ "location": "abstract", "evidence_type": "实验结果", "polarity": "支持",
+ "confidence": {"直接性": "高", "设计合理性": "高", "可复现性": "中", "独立验证": "中"}}
+```
+评注：引文含具体数字、可直接核对；类型=实验结果（有 N=496 与流程）；四分项给了理由
+（496 条样本设计合理性高；单来源独立验证只到"中"——但该结论另有 web 域两篇独立工作
+呼应，报告层可升级表述）。
+
+**好例（反驳极性）**：
+```json
+{"claim_id": "E08x", "claim": "LLM 内在自纠常降低推理性能",
+ "evidence_quote": "...this paper critically examines the role and efficacy of self-correction...",
+ "evidence_type": "实验结果", "polarity": "反驳"}
+```
+评注：极性是相对所挂 claim 而言——自纠文献对"自纠有效"这一 claim 是反驳极性。挂错
+方向是最常见错误。
+
+**坏例（不合格，勿仿）**：
+```json
+{"claim": "多智能体系统效果不好", "evidence_quote": "", "location": "",
+ "evidence_type": "跨论文综合", "polarity": "支持", "confidence": {"直接性": "高"}}
+```
+错处：① 无引文无位置（G4.3 直接拦）；② "效果不好"不可检验；③ 单条证据冒"跨论文综合"
+类型（综合需 ≥2 篇汇聚）；④ 只挂被评系统自己的论文却给直接性"高"。
