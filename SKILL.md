@@ -11,7 +11,7 @@ description: >
 
 ## 原则（区别于文献总结的四个机制）
 
-1. **问题树是骨架**：文献必须挂问题节点，结论必须挂问题；检索停止标准在树上。
+1. **问题树是核心结构**：文献必须挂问题节点，结论必须挂问题；检索停止标准在树上。
 2. **反证是结构性检索线**：不主动找"已经有人做过了"，创新性结论不可信。
 3. **三台账（catalog/evidence/gaps）+ 极性是知识形态**；叙述只是其视图。
 4. **交付决策件**：缺口台账、创新审计、可行性风险、路线图缺一不可。
@@ -50,6 +50,9 @@ description: >
 ### P2 检索计划 → gate check P2
 写 search_protocol.json：核心问题 × 五线（综述/奠基/前沿/引文追踪/反证）矩阵，
 每格 ≥1 查询；每问题 ≥3 同义词；每查询带 date。细则 references/search-strategy.md。
+**领域适配（必读 references/domain-adaptation.md）**：按项目领域确定数据源组合、
+检索词写法、精读卡片必记字段（生物：物种/基因注释版本/实验类型；AI：模型版本/预算；
+医学：研究设计/人群；社科：测量工具）。流程与质量门不随领域变化。
 
 ### P3 搜集+L1 → gate check P3
 逐条执行 protocol 查询（工具表见下），dedup 合并，L1 批量筛选（每批 ~20 篇，
@@ -78,7 +81,7 @@ path=反证）→三分法归类→novelty_audit.json。完整走例见 referenc
 （含失败模式复盘）。方向从缺口推导，不从直觉。
 
 ### P7 报告 → gate check P7
-`render_report.py report --run <RUN>` 生成骨架 → **先重读 L2/L3 卡片汇编数字清单** →
+`render_report.py report --run <RUN>` 生成章节框架 → **先重读 L2/L3 卡片汇编数字清单** →
 按 references/report-writing.md 逐章撰写（每章有写什么/好例/坏例/失败模式；
 章节范例在 templates/zh/examples/）→ check P7。缺章/幽灵引用/占位符/未披露豁免都会被拦；**G7.6 章节深度下限**：§1/§5/§9/§10 ≥200
 正文汉字、§5 ≥300、§4/§8 ≥600——分析章节必须把台账证据用起来：§4 逐工作讨论（L2/L3
@@ -88,7 +91,7 @@ path=反证）→三分法归类→novelty_audit.json。完整走例见 referenc
 ## 工具表（<BASE>/scripts/）
 
 - search_openalex.py：主发现（--type review 找综述；--year-from/to；游标翻页自动）；
-  引文扩展兜底：--cited-by Wxxx（谁引了它）/ --refs-of Wxxx（它引了谁）
+  引文扩展备选方案：--cited-by Wxxx（谁引了它）/ --refs-of Wxxx（它引了谁）
 - search_s2.py：引文扩展（--expand-refs <id> / --expand-cites <id>；普通 --query 检索）；
   免 key 共享池常 429——持续 429 时改用 OpenAlex 引文扩展并降级记录
 - search_epmc.py：生命科学源
@@ -112,4 +115,4 @@ path=反证）→三分法归类→novelty_audit.json。完整走例见 referenc
 
 G1 问题树/简报；G2 检索矩阵/同义词；G3 去重/配额/留痕对账；G4 卡片/精读配额/引文；
 G5 缺口证据/反证强制/双源；G6 先例查询/三分法；G7 章节/引用/占位符/豁免披露。
-豁免不是放水出口：每一次 waive 都进报告 §3，接受读者检验。
+豁免不是绕过检查的通道：每一次 waive 都进报告 §3，接受读者检验。
