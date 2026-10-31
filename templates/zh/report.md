@@ -65,4 +65,6 @@
 
 {{catalog_table}}
 
+{{evidence_table}}
+
 <!-- [agent] 待核验事项清单（哪些结论依赖单一来源、哪些 DOI 未通过打伪）。 -->

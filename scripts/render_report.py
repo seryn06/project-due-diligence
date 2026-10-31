@@ -52,6 +52,15 @@ def table_search_stats(run):
     path = "、".join(f"{k}×{v}" for k, v in sorted(by_path.items()))
     return f"- 检索源：{src}\n- 检索线：{path}\n- 查询总数：{len(log)}"
 
+def evidence_table(run):
+    ev = lib.load_json(os.path.join(run, "evidence.json")) or []
+    if not ev:
+        return "- 证据：无"
+    lines = ["| Exx | 论文 | 主张 |", "|---|---|---|"]
+    for e in ev:
+        lines.append(f"| {e.get('claim_id')} | {e.get('paper_id')} | {str(e.get('claim',''))[:40]} |")
+    return "\n".join(lines)
+
 def waiver_table(run):
     st = lib.load_json(os.path.join(run, "state.json")) or {}
     ws = st.get("waivers") or []
@@ -74,7 +83,8 @@ def build_report(run, template=None, out=None):
             .replace("{{gap_table}}", table_gaps(run))
             .replace("{{novelty_table}}", table_novelty(run))
             .replace("{{waiver_table}}", waiver_table(run))
-            .replace("{{evidence_count}}", str(len(evid))))
+            .replace("{{evidence_count}}", str(len(evid)))
+            .replace("{{evidence_table}}", evidence_table(run)))
     out = out or os.path.join(run, "report.md")
     open(out, "w", encoding="utf-8").write(text)
     print(f"[render] {out}")
